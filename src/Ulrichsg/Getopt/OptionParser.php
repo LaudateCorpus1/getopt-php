@@ -59,9 +59,9 @@ class OptionParser
     /**
      * Processes an option array. The array elements can either be Option objects or arrays conforming to the format
      * (short, long, mode [, description [, default]]). See documentation for details.
-	 *
-	 * Developer note: Please don't add any further elements to the array. Future features should be configured only
-	 * through the Option class's methods.
+     *
+     * Developer note: Please don't add any further elements to the array. Future features should be configured only
+     * through the Option class's methods.
      *
      * @param array $array
      * @return Option[]

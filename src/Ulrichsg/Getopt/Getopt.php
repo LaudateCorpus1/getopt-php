@@ -23,6 +23,8 @@ class Getopt implements \Countable, \ArrayAccess, \IteratorAggregate
     /** @var Option[] */
     private $optionList = array();
     /** @var array */
+    private $targets = array();
+    /** @var array */
     private $options = array();
     /** @var array */
     private $operands = array();
@@ -99,11 +101,11 @@ class Getopt implements \Countable, \ArrayAccess, \IteratorAggregate
 
     private function optionsConflict(Option $option1, Option $option2) {
         if ((is_null($option1->short()) && is_null($option2->short()))
-                || (is_null($option1->long()) && is_null($option2->long()))) {
+            || (is_null($option1->long()) && is_null($option2->long()))) {
             return false;
         }
         return ((($option1->short() === $option2->short()) && ($option1->long() !== $option2->long()))
-                || (($option1->short() !== $option2->short()) && ($option1->long() === $option2->long())));
+            || (($option1->short() !== $option2->short()) && ($option1->long() === $option2->long())));
     }
 
     /**
@@ -129,8 +131,32 @@ class Getopt implements \Countable, \ArrayAccess, \IteratorAggregate
 
         $parser = new CommandLineParser($this->optionList);
         $parser->parse($arguments);
+
+        $this->targets = $parser->getTargets();
         $this->options = $parser->getOptions();
         $this->operands = $parser->getOperands();
+    }
+
+    /**
+     * Returns the list of targets. Must be invoked after parse() (otherwise it returns an empty array).
+     *
+     * @return array
+     */
+    public function getTargets()
+    {
+        return $this->options;
+    }
+
+    /**
+     * Returns a target by key. Must be invoked after parse() (otherwise it returns null).
+     *
+     * @param int $key
+     *
+     * @return mixed
+     */
+    public function getTarget($key = 0)
+    {
+        return isset($this->targets[$key]) ? $this->targets[$key] : null;
     }
 
     /**
@@ -164,6 +190,29 @@ class Getopt implements \Countable, \ArrayAccess, \IteratorAggregate
     }
 
     /**
+     * Sets a single options value
+     *
+     * @param      $name
+     * @param null $value
+     */
+    public function setOption($name, $value = null)
+    {
+        $this->options[$name] = $value;
+    }
+
+    /**
+     * Sets many option values
+     *
+     * @param array $options
+     */
+    public function setOptions(array $options = array())
+    {
+        foreach ($options as $key => $value) {
+            $this->setOption($key, $value);
+        }
+    }
+
+    /**
      * Returns the list of operands. Must be invoked after parse().
      *
      * @return array
@@ -179,7 +228,7 @@ class Getopt implements \Countable, \ArrayAccess, \IteratorAggregate
      * @param int $i
      * @return string
      */
-    public function getOperand($i)
+    public function getOperand($i = 0)
     {
         return ($i < count($this->operands)) ? $this->operands[$i] : null;
     }

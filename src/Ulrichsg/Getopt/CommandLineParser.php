@@ -12,6 +12,7 @@ class CommandLineParser
 
     private $options = array();
     private $operands = array();
+    private $targets = array();
 
     /**
      * Creates a new instance.
@@ -40,13 +41,17 @@ class CommandLineParser
             if (empty($arg)) {
                 continue;
             }
-            if ($arg == '--' || mb_substr($arg, 0, 1) != '-') {
+
+            if ($arg == '--') {
                 // no more options, treat the remaining arguments as operands
                 $firstOperandIndex = ($arg == '--') ? $i + 1 : $i;
                 $operands = array_slice($arguments, $firstOperandIndex);
                 break;
             }
-            if (mb_substr($arg, 0, 2) == '--') {
+
+            if (mb_substr($arg, 0, 1) != '-') {
+                $this->targets[] = $arg;
+            } elseif (mb_substr($arg, 0, 2) == '--') {
                 $this->addLongOption($arguments, $i);
             } else {
                 $this->addShortOption($arguments, $i);
@@ -64,6 +69,16 @@ class CommandLineParser
     }
 
     /**
+     * Returns the targets created by a previous invocation of parse().
+     *
+     * @return array
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
      * Returns the options created by a previous invocation of parse().
      *
      * @return array
@@ -72,7 +87,6 @@ class CommandLineParser
     {
         return $this->options;
     }
-
 
     /**
      * Returns the operands created by a previous invocation of parse(),
@@ -93,11 +107,11 @@ class CommandLineParser
             $options = $this->splitString($option, 1);
             foreach ($options as $j => $ch) {
                 if ($j < count($options) - 1
-                        || !(
-                                $i < $numArgs - 1
-                                && mb_substr($arguments[$i + 1], 0, 1) != '-'
-                                && $this->optionHasArgument($ch)
-                        )
+                    || !(
+                        $i < $numArgs - 1
+                        && mb_substr($arguments[$i + 1], 0, 1) != '-'
+                        && $this->optionHasArgument($ch)
+                    )
                 ) {
                     $this->addOption($ch, null);
                 } else { // e.g. `ls -sw 100`
@@ -108,8 +122,8 @@ class CommandLineParser
             }
         } else {
             if ($i < $numArgs - 1
-                    && mb_substr($arguments[$i + 1], 0, 1) != '-'
-                    && $this->optionHasArgument($option)
+                && mb_substr($arguments[$i + 1], 0, 1) != '-'
+                && $this->optionHasArgument($option)
             ) {
                 $value = $arguments[$i + 1];
                 ++$i;
@@ -125,8 +139,8 @@ class CommandLineParser
         $option = mb_substr($arguments[$i], 2);
         if (strpos($option, '=') === false) {
             if ($i < count($arguments) - 1
-                    && mb_substr($arguments[$i + 1], 0, 1) != '-'
-                    && $this->optionHasArgument($option)
+                && mb_substr($arguments[$i + 1], 0, 1) != '-'
+                && $this->optionHasArgument($option)
             ) {
                 $value = $arguments[$i + 1];
                 ++$i;
@@ -176,7 +190,8 @@ class CommandLineParser
                 return;
             }
         }
-        throw new \UnexpectedValueException("Option '$string' is unknown");
+
+        // throw new \UnexpectedValueException("Option '$string' is unknown");
     }
 
     /**
@@ -187,8 +202,8 @@ class CommandLineParser
     {
         foreach ($this->optionList as $option) {
             if ($option->getArgument()->hasDefaultValue()
-                    && !isset($this->options[$option->short()])
-                    && !isset($this->options[$option->long()])
+                && !isset($this->options[$option->short()])
+                && !isset($this->options[$option->long()])
             ) {
                 if ($option->short()) {
                     $this->addOption($option->short(), $option->getArgument()->getDefaultValue());

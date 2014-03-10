@@ -11,7 +11,7 @@ class Argument
 
     /**
      * Creates a new argument.
-     * 
+     *
      * @param scalar|null $default Default value or NULL
      * @param callable|null $validation a validation function (optional)
      * @throws \InvalidArgumentException
@@ -28,14 +28,14 @@ class Argument
 
     /**
      * Set the default value
-     * 
+     *
      * @param scalar $value
      * @return Argument this object (for chaining calls)
      * @throws \InvalidArgumentException
      */
-    public function setDefaultValue($value)
+    public function setDefaultValue($value = null)
     {
-        if (!is_scalar($value)) {
+        if (!is_scalar($value) && !is_null($value)) {
             throw new \InvalidArgumentException("Default value must be scalar");
         }
         $this->default = $value;
@@ -45,7 +45,7 @@ class Argument
     /**
      * Set a validation function.
      * The function must take a string and return true if it is valid, false otherwise.
-     * 
+     *
      * @param callable $callable
      * @return Argument this object (for chaining calls)
      * @throws \InvalidArgumentException
@@ -61,7 +61,7 @@ class Argument
 
     /**
      * Check if an argument validates according to the specification.
-     * 
+     *
      * @param string $arg
      * @return bool
      */
@@ -72,7 +72,7 @@ class Argument
 
     /**
      * Check if the argument has a validation function
-     * 
+     *
      * @return bool
      */
     public function hasValidation()
@@ -82,7 +82,7 @@ class Argument
 
     /**
      * Check whether the argument has a default value
-     * 
+     *
      * @return boolean
      */
     public function hasDefaultValue()
@@ -92,7 +92,7 @@ class Argument
 
     /**
      * Retrieve the default value
-     * 
+     *
      * @return scalar|null
      */
     public function getDefaultValue()
